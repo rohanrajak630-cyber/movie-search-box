@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Movie Website</title>
+
+<style>
+body {
+    background: #111;
+    color: white;
+    text-align: center;
+    font-family: Arial;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+input {
+    padding: 10px;
+    width: 250px;
+    margin-top: 20px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    background: #ffcc00;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: #e6b800;
+}
+
+#movies {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.card {
+    background: #222;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.card img {
+    width: 100%;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎬 Movie Website</h1>
+
+<input type="text" id="searchBox" placeholder="Enter movie name">
+<button onclick="searchMovie()">Search</button>
+
+<div id="movies"></div>
+
+<script>
+const TMDB_API_KEY = "b54bccee28af063149af7eb116e3c2d1";
+
+function searchMovie() {
+    const movieName = document.getElementById("searchBox").value.trim();
+    const moviesDiv = document.getElementById("movies");
+
+    if (!movieName) {
+        alert("Please enter a movie name");
+        return;
+    }
+
+    moviesDiv.innerHTML = "Loading...";
+
+    const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(movieName)}`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+
+            moviesDiv.innerHTML = "";
+
+            if (!data.results || data.results.length === 0) {
+                moviesDiv.innerHTML = "No movies found!";
+                return;
+            }
+
+            data.results.forEach(movie => {
+
+                const poster = movie.poster_path
+                    ? "https://image.tmdb.org/t/p/w200" + movie.poster_path
+                    : "https://via.placeholder.com/200x300?text=No+Image";
+
+                moviesDiv.innerHTML += `
+                    <div class="card">
+                        <h3>${movie.title}</h3>
+                        <img src="${poster}">
+                        <p>📅 ${movie.release_date || "N/A"}</p>
+                        <p>⭐ ${movie.vote_average}</p>
+                        <p>${movie.overview ? movie.overview.slice(0, 100) + "..." : ""}</p>
+                    </div>
+                `;
+            });
+
+        })
+        .catch(error => {
+            console.log(error);
+            moviesDiv.innerHTML = "Error loading data!";
+        });
+}
+</script>
+
+</body>
+</html>
